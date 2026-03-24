@@ -55,32 +55,34 @@
     });
 
     // 2. High-Visibility Settings for Tracks
-    function addTrack() {
-        console.log("Adding Track..."); // Check your browser console
-        
-        const track = new fabric.Rect({
-            left: 50, 
-            top: 50, 
-            fill: '#333333', // Solid Dark Grey
-            width: 200, 
-            height: 20,      // Thicker for mobile visibility
-            rx: 5, 
-            ry: 5,
-            hasControls: true,
-            hasBorders: true,
-            borderColor: '#1abc9c',
-            cornerColor: '#1abc9c',
-            cornerSize: 30,  // HUGE handles for easy grabbing
-            transparentCorners: false
-        });
+    
+function addTrack() {
+    console.log("Button clicked - Creating Track...");
+    
+    const track = new fabric.Rect({
+        left: 50,
+        top: 50,
+        width: 250, 
+        height: 20,
+        fill: '#333333',     // Dark Grey fill
+        stroke: '#ff0000',   // BRIGHT RED BORDER (to see if it's there)
+        strokeWidth: 2,
+        opacity: 1,          // Ensure it's not transparent
+        visible: true,
+        selectable: true,
+        hasControls: true,
+        cornerSize: 30,      // Large handles
+        cornerColor: '#1abc9c',
+        transparentCorners: false
+    });
 
-        canvas.add(track);
-        canvas.setActiveObject(track);
-        canvas.renderAll(); // Force the screen to refresh
-        
-        // Visual confirmation for the user
-        console.log("Track added at: ", track.left, track.top);
-    }
+    canvas.add(track);
+    canvas.moveTo(track, 999); // Bring to the absolute front
+    canvas.setActiveObject(track);
+    canvas.renderAll(); 
+    
+    console.log("Track should now be visible at top left.");
+}
 
     // 3. Add a "Clear All" in case things get messy
     function clearCanvas() {
