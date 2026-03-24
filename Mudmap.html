@@ -47,69 +47,49 @@
 </div>
 
 <script>
-    const canvas = new fabric.Canvas('c');
-    
-    // Mobile Touch Settings
-    fabric.Object.prototype.set({
-        transparentCorners: false,
-        cornerColor: '#1abc9c',
-        cornerSize: 24, // Large for Android thumbs
-        padding: 10
+        // 1. Initialize Canvas with Auto-Resize for Android
+    const canvas = new fabric.Canvas('c', {
+        width: window.innerWidth - 300, // Adjusts to your screen width
+        height: window.innerHeight - 50,
+        backgroundColor: '#ffffff'
     });
 
+    // 2. High-Visibility Settings for Tracks
     function addTrack() {
+        console.log("Adding Track..."); // Check your browser console
+        
         const track = new fabric.Rect({
-            left: 100, top: 100, fill: '#333', width: 200, height: 12, rx: 5, ry: 5
+            left: 50, 
+            top: 50, 
+            fill: '#333333', // Solid Dark Grey
+            width: 200, 
+            height: 20,      // Thicker for mobile visibility
+            rx: 5, 
+            ry: 5,
+            hasControls: true,
+            hasBorders: true,
+            borderColor: '#1abc9c',
+            cornerColor: '#1abc9c',
+            cornerSize: 30,  // HUGE handles for easy grabbing
+            transparentCorners: false
         });
-        canvas.add(track).setActiveObject(track);
+
+        canvas.add(track);
+        canvas.setActiveObject(track);
+        canvas.renderAll(); // Force the screen to refresh
+        
+        // Visual confirmation for the user
+        console.log("Track added at: ", track.left, track.top);
     }
 
-    function addTurnout(dir) {
-        const path = (dir === 'L') ? 'M 0 0 L 80 0 M 20 0 L 60 -30' : 'M 0 0 L 80 0 M 20 0 L 60 30';
-        const turnout = new fabric.Path(path, {
-            left: 150, top: 150, stroke: '#2980b9', strokeWidth: 6, fill: ''
-        });
-        canvas.add(turnout).setActiveObject(turnout);
-    }
-
-    function addCrossover() {
-        const group = new fabric.Group([
-            new fabric.Path('M 0 0 L 120 0', { stroke: '#333', strokeWidth: 6 }),
-            new fabric.Path('M 0 50 L 120 50', { stroke: '#333', strokeWidth: 6 }),
-            new fabric.Path('M 30 0 L 90 50', { stroke: '#e67e22', strokeWidth: 6 })
-        ], { left: 200, top: 200 });
-        canvas.add(group).setActiveObject(group);
-    }
-
-    function addText() {
-        const text = new fabric.IText('Label', {
-            left: 100, top: 100, fontSize: 20, fontFamily: 'sans-serif', fontWeight: 'bold'
-        });
-        canvas.add(text).setActiveObject(text);
-    }
-
-    function deleteObj() {
-        canvas.remove(canvas.getActiveObject());
-    }
-
-    function exportMap() {
-        const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
-        console.log("Encoded Image:", dataURL);
-        alert("Map ready! Connect your Power Automate URL to finish the auto-save.");
-    }
-
-    // Register Service Worker for Offline
-    if('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
-    }
-
-    // Shortcut: 'R' to rotate
-    document.addEventListener('keydown', (e) => {
-        if(e.key.toLowerCase() === 'r') {
-            const obj = canvas.getActiveObject();
-            if(obj) { obj.rotate((obj.angle || 0) + 45); canvas.renderAll(); }
+    // 3. Add a "Clear All" in case things get messy
+    function clearCanvas() {
+        if(confirm("Clear the whole map?")) {
+            canvas.clear();
+            canvas.backgroundColor = '#ffffff';
         }
-    });
+    }
+
 </script>
 </body>
 </html>
