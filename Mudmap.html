@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rail Mud Map Tool</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: #1a252f; color: white; overflow: hidden; }
+        #sidebar { width: 260px; background: #2c3e50; padding: 15px; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 10; }
+        #canvas-area { flex-grow: 1; background: #ecf0f1; display: flex; justify-content: center; align-items: center; position: relative; }
+        canvas { border: 1px solid #bdc3c7; background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        h2 { color: #1abc9c; font-size: 1.2rem; margin-top: 0; }
+        .section { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; margin: 15px 0 5px; letter-spacing: 1px; }
+        .btn { background: #34495e; color: white; border: none; padding: 12px; width: 100%; margin-bottom: 8px; cursor: pointer; border-radius: 6px; font-weight: 600; text-align: left; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); background: #1abc9c; }
+        .btn-save { background: #27ae60; margin-top: auto; text-align: center; }
+        .btn-del { background: #c0392b; text-align: center; }
+        
+        input { background: #34495e; border: 1px solid #5d6d7e; color: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; width: calc(100% - 22px); }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>Rail Mud Map</h2>
+    <input type="text" id="worksite" placeholder="Worksite Name">
+    
+    <div class="section">Infrastructure</div>
+    <button class="btn" onclick="addTrack()">➕ Straight Track</button>
+    <button class="btn" onclick="addTurnout('L')">⬅️ Left Turnout</button>
+    <button class="btn" onclick="addTurnout('R')">➡️ Right Turnout</button>
+    <button class="btn" onclick="addCrossover()">✖️ Crossover</button>
+    
+    <div class="section">Labels</div>
+    <button class="btn" onclick="addText()">📝 Add Label</button>
+    
+    <div class="section">Actions</div>
+    <button class="btn btn-del" onclick="deleteObj()">🗑️ Delete Selected</button>
+    <button class="btn btn-save" onclick="exportMap()">💾 Save to ONRSR Folder</button>
+</div>
+
+<div id="canvas-area">
+    <canvas id="c" width="800" height="600"></canvas>
+</div>
+
+<script>
+    const canvas = new fabric.Canvas('c');
+    
+    // Mobile Touch Settings
+    fabric.Object.prototype.set({
+        transparentCorners: false,
+        cornerColor: '#1abc9c',
+        cornerSize: 24, // Large for Android thumbs
+        padding: 10
+    });
+
+    function addTrack() {
+        const track = new fabric.Rect({
+            left: 100, top: 100, fill: '#333', width: 200, height: 12, rx: 5, ry: 5
+        });
+        canvas.add(track).setActiveObject(track);
+    }
+
+    function addTurnout(dir) {
+        const path = (dir === 'L') ? 'M 0 0 L 80 0 M 20 0 L 60 -30' : 'M 0 0 L 80 0 M 20 0 L 60 30';
+        const turnout = new fabric.Path(path, {
+            left: 150, top: 150, stroke: '#2980b9', strokeWidth: 6, fill: ''
+        });
+        canvas.add(turnout).setActiveObject(turnout);
+    }
+
+    function addCrossover() {
+        const group = new fabric.Group([
+            new fabric.Path('M 0 0 L 120 0', { stroke: '#333', strokeWidth: 6 }),
+            new fabric.Path('M 0 50 L 120 50', { stroke: '#333', strokeWidth: 6 }),
+            new fabric.Path('M 30 0 L 90 50', { stroke: '#e67e22', strokeWidth: 6 })
+        ], { left: 200, top: 200 });
+        canvas.add(group).setActiveObject(group);
+    }
+
+    function addText() {
+        const text = new fabric.IText('Label', {
+            left: 100, top: 100, fontSize: 20, fontFamily: 'sans-serif', fontWeight: 'bold'
+        });
+        canvas.add(text).setActiveObject(text);
+    }
+
+    function deleteObj() {
+        canvas.remove(canvas.getActiveObject());
+    }
+
+    function exportMap() {
+        const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
+        console.log("Encoded Image:", dataURL);
+        alert("Map ready! Connect your Power Automate URL to finish the auto-save.");
+    }
+
+    // Register Service Worker for Offline
+    if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+    }
+
+    // Shortcut: 'R' to rotate
+    document.addEventListener('keydown', (e) => {
+        if(e.key.toLowerCase() === 'r') {
+            const obj = canvas.getActiveObject();
+            if(obj) { obj.rotate((obj.angle || 0) + 45); canvas.renderAll(); }
+        }
+    });
+</script>
+</body>
+</html>
